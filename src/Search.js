@@ -17,6 +17,7 @@ const getListFromApi = async name => {
   ).then(res => res.json());
   var filteredValue = results.filter(data => data.name.includes(name));
   console.log(filteredValue.map(data => data.name));
+
   return filteredValue;
   //   console.log(
   //     filteredValue.map(row => {
