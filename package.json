@@ -8,7 +8,10 @@
     "@testing-library/user-event": "^7.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react-jss": "^10.1.1",
+    "react-scripts": "3.4.1",
+    "rxjs": "^6.5.4",
+    "use-debounce": "^3.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
