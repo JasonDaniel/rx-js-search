@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { from, BehaviorSubject } from "rxjs";
 import {
-  map,
-  delay,
   filter,
   mergeMap,
   debounceTime,
@@ -16,7 +14,7 @@ const getListFromApi = async name => {
     "https://pokeapi.co/api/v2/pokemon/?limit=1000"
   ).then(res => res.json());
   var filteredValue = results.filter(data => data.name.includes(name));
-  console.log(filteredValue.map(data => data.name));
+  // console.log(filteredValue.map(data => data.name));
 
   return filteredValue;
   //   console.log(
@@ -56,14 +54,15 @@ const Search = () => {
     const newValue = e.target.value;
     setSearch(newValue);
     searchSubject.next(newValue);
+    console.log(newValue);
   };
   return (
     <div>
       <input
         type="text"
-        //value={search}
-        // onChange={handleSearchChange}
-        onChange={e => getListFromApi(e.target.value)}
+        value={search}
+        onChange={handleSearchChange}
+        onChange={handleSearchChange}
         placeholder={"Search"}
       />
       <div>{JSON.stringify(result)}</div>;
