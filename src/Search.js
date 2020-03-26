@@ -1,22 +1,30 @@
 import React, { useEffect, useState } from "react";
+import withStyles from "react-jss";
 import { from, BehaviorSubject } from "rxjs";
 import {
+  map,
   filter,
   mergeMap,
   debounceTime,
-  distinctUntilChanged
+  distinctUntilChanged,
+  switchMap
 } from "rxjs/operators";
-const style = {};
+const style = {
+  hidden: {
+    display: "none"
+  }
+};
 
 const getListFromApi = async name => {
-  console.log(name);
+  console.log("api", name);
   const { results } = await fetch(
     "https://pokeapi.co/api/v2/pokemon/?limit=1000"
   ).then(res => res.json());
   var filteredValue = results.filter(data => data.name.includes(name));
   // console.log(filteredValue.map(data => data.name));
-
-  return filteredValue;
+  console.log("api", name);
+  if (filteredValue) return filteredValue;
+  else return [];
   //   console.log(
   //     filteredValue.map(row => {
   //       return row.name;
@@ -26,35 +34,35 @@ const getListFromApi = async name => {
 
 let searchSubject = new BehaviorSubject("");
 let searchResultObservable = searchSubject.pipe(
-  filter(val => {
-    console.log(val);
-    return val.length > 1;
-  }),
-  debounceTime(500),
-  distinctUntilChanged(),
-  mergeMap(val => from(getListFromApi(val)))
+  // filter(val => {
+  //   console.log("inside observable", val);
+  //   return val.length > 1;
+  // }),
+  // debounceTime(500),
+  // distinctUntilChanged(),
+  // switchMap(val => {
+  //   console.log("inside mergeMap", val);
+  //   getListFromApi(val));
+  // })
+  switchMap(val => getListFromApi(val))
 );
+var displayFlag = 0;
 
-const useObservable = (observable, setter) => {
-  useEffect(() => {
-    let subscription = observable.subscribe(result => {
-      setter(result);
-      console.log(result);
-    });
-    return subscription.unsubscribe();
-  }, [observable, setter]);
-};
-
-const Search = () => {
+const Search = ({ classes }) => {
   const [search, setSearch] = useState("");
   const [result, setResult] = useState([]);
+  useEffect(() => {
+    searchResultObservable.subscribe(result => {
+      setResult(result);
+    });
+  }, [search]);
 
-  useObservable(searchResultObservable, setResult);
   const handleSearchChange = e => {
+    displayFlag = 1;
     const newValue = e.target.value;
+    newValue.length > 0 ? (displayFlag = 1) : (displayFlag = 0);
     setSearch(newValue);
     searchSubject.next(newValue);
-    console.log(newValue);
   };
   return (
     <div>
@@ -62,12 +70,15 @@ const Search = () => {
         type="text"
         value={search}
         onChange={handleSearchChange}
-        onChange={handleSearchChange}
         placeholder={"Search"}
       />
-      <div>{JSON.stringify(result)}</div>;
+      {result.map(data => (
+        <div className={displayFlag ? classes.display : classes.hidden}>
+          {data.name}
+        </div>
+      ))}
     </div>
   );
 };
 
-export default Search;
+export default withStyles(style)(Search);
