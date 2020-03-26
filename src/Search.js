@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 import withStyles from "react-jss";
-import { from, BehaviorSubject } from "rxjs";
-import {
-  map,
-  filter,
-  mergeMap,
-  debounceTime,
-  distinctUntilChanged,
-  switchMap
-} from "rxjs/operators";
+import { BehaviorSubject } from "rxjs";
+import { debounceTime, distinctUntilChanged, switchMap } from "rxjs/operators";
 const style = {
   hidden: {
     display: "none"
@@ -21,31 +14,18 @@ const getListFromApi = async name => {
     "https://pokeapi.co/api/v2/pokemon/?limit=1000"
   ).then(res => res.json());
   var filteredValue = results.filter(data => data.name.includes(name));
-  // console.log(filteredValue.map(data => data.name));
   console.log("api", name);
   if (filteredValue) return filteredValue;
   else return [];
-  //   console.log(
-  //     filteredValue.map(row => {
-  //       return row.name;
-  //     })
-  //   );
 };
 
 let searchSubject = new BehaviorSubject("");
 let searchResultObservable = searchSubject.pipe(
-  // filter(val => {
-  //   console.log("inside observable", val);
-  //   return val.length > 1;
-  // }),
-  // debounceTime(500),
-  // distinctUntilChanged(),
-  // switchMap(val => {
-  //   console.log("inside mergeMap", val);
-  //   getListFromApi(val));
-  // })
+  debounceTime(500),
+  distinctUntilChanged(),
   switchMap(val => getListFromApi(val))
 );
+
 var displayFlag = 0;
 
 const Search = ({ classes }) => {
@@ -66,14 +46,15 @@ const Search = ({ classes }) => {
   };
   return (
     <div>
+      <h1>Search for your favourite pokemon</h1>
       <input
         type="text"
         value={search}
         onChange={handleSearchChange}
         placeholder={"Search"}
       />
-      {result.map(data => (
-        <div className={displayFlag ? classes.display : classes.hidden}>
+      {result.map((data, i) => (
+        <div key={i} className={displayFlag ? classes.display : classes.hidden}>
           {data.name}
         </div>
       ))}
